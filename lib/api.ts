@@ -22,6 +22,8 @@ const SUPABASE_ENABLED = Boolean(
   process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 );
+const DISABLE_SUPABASE_FALLBACK =
+  process.env.NEXT_PUBLIC_DISABLE_SUPABASE_FALLBACK === "true";
 
 function delay<T>(value: T, wait = WAIT_MS): Promise<T> {
   return new Promise((resolve) => {
@@ -140,8 +142,21 @@ function mapCallLogRow(row: Record<string, unknown>): CallLog {
   };
 }
 
-function warnAndUseLocal(error: unknown) {
-  console.warn("Supabase request failed; using local fallback.", error);
+function warnAndUseLocal(error: unknown, context?: string) {
+  console.warn(
+    "Supabase request failed; using local fallback.",
+    context ? { context } : undefined,
+    error,
+  );
+  if (DISABLE_SUPABASE_FALLBACK) {
+    throw error instanceof Error
+      ? error
+      : new Error(
+          typeof error === "string"
+            ? error
+            : "Supabase request failed (see console for details).",
+        );
+  }
 }
 
 export async function getPatients(): Promise<Patient[]> {
@@ -155,7 +170,7 @@ export async function getPatients(): Promise<Patient[]> {
     .order("created_at", { ascending: false });
 
   if (error || !data) {
-    warnAndUseLocal(error);
+    warnAndUseLocal(error, "getPatients");
     return delay(getStoredPatients());
   }
 
@@ -195,7 +210,7 @@ export async function createPatient(input: NewPatientInput): Promise<Patient> {
     .single();
 
   if (error || !data) {
-    warnAndUseLocal(error);
+    warnAndUseLocal(error, "createPatient insert patients");
     saveStoredPatients([patient, ...getStoredPatients()]);
     return delay(patient);
   }
@@ -214,7 +229,7 @@ export async function getReminders(): Promise<Reminder[]> {
   ]);
 
   if (questionsResponse.error || !questionsResponse.data) {
-    warnAndUseLocal(questionsResponse.error);
+    warnAndUseLocal(questionsResponse.error, "getReminders select questions");
     return delay(getStoredReminders());
   }
 
@@ -279,7 +294,7 @@ export async function createReminder(
     .single();
 
   if (error || !data) {
-    warnAndUseLocal(error);
+    warnAndUseLocal(error, "createReminder insert questions");
     saveStoredReminders([reminder, ...getStoredReminders()]);
     return delay(reminder);
   }
@@ -324,7 +339,10 @@ async function persistCallResult(
   ]);
 
   if (reminderUpdate.error || logInsert.error) {
-    warnAndUseLocal(reminderUpdate.error ?? logInsert.error);
+    warnAndUseLocal(
+      reminderUpdate.error ?? logInsert.error,
+      "persistCallResult update questions / insert call_logs",
+    );
     const reminders = getStoredReminders();
     const updatedReminders = reminders.map((item) =>
       item.id === reminderId ? { ...item, status, summary } : item,
@@ -345,7 +363,7 @@ export async function getCallLogs(): Promise<CallLog[]> {
     .order("created_at", { ascending: false });
 
   if (error || !data) {
-    warnAndUseLocal(error);
+    warnAndUseLocal(error, "getCallLogs select call_logs");
     return delay(getStoredCallLogs());
   }
 

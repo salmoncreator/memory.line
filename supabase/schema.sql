@@ -15,6 +15,14 @@ create table if not exists public.patients (
   created_at timestamptz not null default now()
 );
 
+-- Ensure columns exist on pre-existing patients table
+alter table public.patients
+  add column if not exists age integer,
+  add column if not exists notes text not null default '',
+  add column if not exists risk_level text not null default 'Medium',
+  add column if not exists preferred_tone text not null default 'Calm assistant',
+  add column if not exists created_at timestamptz not null default now();
+
 create table if not exists public.questions (
   id text primary key,
   patient_id text not null references public.patients(id) on delete cascade,
@@ -32,6 +40,19 @@ create table if not exists public.questions (
   created_at timestamptz not null default now()
 );
 
+-- Ensure columns exist on pre-existing questions table
+alter table public.questions
+  add column if not exists patient_name text,
+  add column if not exists message text,
+  add column if not exists scheduled_date text,
+  add column if not exists scheduled_time text,
+  add column if not exists repeat text,
+  add column if not exists voice_style text,
+  add column if not exists safety_alert boolean not null default false,
+  add column if not exists status text not null default 'Pending',
+  add column if not exists summary text,
+  add column if not exists created_at timestamptz not null default now();
+
 create table if not exists public.call_logs (
   id text primary key,
   reminder_id text not null references public.questions(id) on delete cascade,
@@ -45,6 +66,19 @@ create table if not exists public.call_logs (
   caregiver_alert text not null default 'No urgent concerns detected.',
   created_at timestamptz not null default now()
 );
+
+-- Ensure columns exist on pre-existing call_logs table
+alter table public.call_logs
+  add column if not exists reminder_id text,
+  add column if not exists patient_id text,
+  add column if not exists patient_name text,
+  add column if not exists reminder_title text,
+  add column if not exists date_time text,
+  add column if not exists status text,
+  add column if not exists summary text,
+  add column if not exists transcript jsonb not null default '[]'::jsonb,
+  add column if not exists caregiver_alert text not null default 'No urgent concerns detected.',
+  add column if not exists created_at timestamptz not null default now();
 
 create index if not exists idx_questions_patient_id on public.questions(patient_id);
 create index if not exists idx_questions_created_at on public.questions(created_at desc);
