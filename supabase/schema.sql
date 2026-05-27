@@ -18,6 +18,7 @@ create table if not exists public.patients (
 -- Ensure columns exist on pre-existing patients table
 alter table public.patients
   add column if not exists age integer,
+  add column if not exists relationship text,
   add column if not exists notes text not null default '',
   add column if not exists risk_level text not null default 'Medium',
   add column if not exists preferred_tone text not null default 'Calm assistant',
@@ -42,7 +43,10 @@ create table if not exists public.questions (
 
 -- Ensure columns exist on pre-existing questions table
 alter table public.questions
+  add column if not exists patient_id uuid,
   add column if not exists patient_name text,
+  add column if not exists type text,
+  add column if not exists title text,
   add column if not exists message text,
   add column if not exists scheduled_date text,
   add column if not exists scheduled_time text,

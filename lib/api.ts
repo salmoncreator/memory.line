@@ -33,10 +33,10 @@ function delay<T>(value: T, wait = WAIT_MS): Promise<T> {
 
 function createId(prefix: string) {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return `${prefix}-${crypto.randomUUID()}`;
+    return crypto.randomUUID();
   }
 
-  return `${prefix}-${Date.now()}`;
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function firstName(name: string) {
