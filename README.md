@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MemoryLine
 
-## Getting Started
+MemoryLine is a hackathon demo app for caregiver-managed voice AI reminder
+calls.
 
-First, run the development server:
+## Run Locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Real ElevenLabs Calls
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The app works in mock mode by default. The "Call Now" buttons call
+`app/api/call-now/route.ts`, which returns demo data unless real calls are
+enabled.
 
-## Learn More
+To enable real outbound calls:
 
-To learn more about Next.js, take a look at the following resources:
+1. Create an ElevenLabs Agent.
+2. Connect a Twilio phone number to the agent in ElevenLabs.
+3. Copy `.env.example` to `.env.local`.
+4. Fill in:
+   - `ELEVENLABS_API_KEY`
+   - `ELEVENLABS_AGENT_ID`
+   - `ELEVENLABS_AGENT_PHONE_NUMBER_ID`
+5. Set `ENABLE_REAL_CALLS=true`.
+6. Restart the dev server or redeploy on Vercel.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Keep `.env.local` private. Do not paste API keys into frontend files.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+On Vercel, add the same values under Project Settings > Environment Variables.
 
-## Deploy on Vercel
+## Safety
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Use real calls only with consent from demo recipients. MemoryLine is a
+supportive reminder tool and does not provide medical advice, emergency
+response, or professional caregiving.
