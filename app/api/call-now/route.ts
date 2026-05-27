@@ -18,12 +18,16 @@ type ElevenLabsOutboundResponse = {
   callSid: string | null;
 };
 
+const ELEVENLABS_API_KEY = "sk_ae4747919ac4233a7dcfa29276abefe0f744e0f1476c6800";
+const ELEVENLABS_AGENT_ID = "agent_0401ksn6gxfsf048sqade1tzqwfm";
+const ELEVENLABS_AGENT_PHONE_NUMBER_ID = "phnum_2601ksn7d7vjf2xtyk4pv19bf91e";
+
+function getAgentPhoneNumberId() {
+  return ELEVENLABS_AGENT_PHONE_NUMBER_ID;
+}
+
 function missingElevenLabsConfig() {
-  return (
-    !process.env.ELEVENLABS_API_KEY ||
-    !process.env.ELEVENLABS_AGENT_ID ||
-    !process.env.ELEVENLABS_AGENT_PHONE_NUMBER_ID
-  );
+  return false;
 }
 
 function mockCall(reminderId?: string) {
@@ -45,10 +49,7 @@ function mockCall(reminderId?: string) {
 export async function POST(request: Request) {
   const body = (await request.json()) as CallNowRequest;
 
-  if (
-    process.env.ENABLE_REAL_CALLS !== "true" ||
-    missingElevenLabsConfig()
-  ) {
+  if (missingElevenLabsConfig()) {
     return mockCall(body.reminderId);
   }
 
@@ -59,10 +60,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const apiKey = process.env.ELEVENLABS_API_KEY as string;
-  const agentId = process.env.ELEVENLABS_AGENT_ID as string;
-  const agentPhoneNumberId = process.env
-    .ELEVENLABS_AGENT_PHONE_NUMBER_ID as string;
+  const apiKey = ELEVENLABS_API_KEY;
+  const agentId = ELEVENLABS_AGENT_ID;
+  const agentPhoneNumberId = ELEVENLABS_AGENT_PHONE_NUMBER_ID;
 
   const elevenLabsResponse = await fetch(
     "https://api.elevenlabs.io/v1/convai/twilio/outbound-call",
